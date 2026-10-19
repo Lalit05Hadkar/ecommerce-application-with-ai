@@ -71,8 +71,8 @@ export default function Navbar() {
           <Link href="/men">Men</Link>
         </nav>
 
-        <Link href="/" className="nav-logo" aria-label="VELOUR home">
-          VELOUR
+        <Link href="/" className="nav-logo" aria-label="AURELIA home">
+          AURELIA
         </Link>
 
         <div className="nav-actions">
@@ -115,7 +115,7 @@ export default function Navbar() {
           <input
             ref={inputRef}
             type="search"
-            placeholder="Search VELOUR…"
+            placeholder="Search AURELIA…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="Search products"
@@ -149,7 +149,7 @@ export default function Navbar() {
       />
       <aside className={`drawer${menuOpen ? " open" : ""}`} aria-hidden={!menuOpen}>
         <div className="drawer-head">
-          <span className="nav-logo">VELOUR</span>
+          <span className="nav-logo">AURELIA</span>
           <button
             className="nav-icon-btn"
             aria-label="Close menu"

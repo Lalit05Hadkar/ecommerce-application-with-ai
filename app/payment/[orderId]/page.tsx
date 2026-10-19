@@ -40,17 +40,34 @@ export default function PaymentPage({
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { data, error } = await insforge.database
-        .from("orders")
-        .select("id, total, payment_status")
-        .eq("id", orderId)
-        .maybeSingle();
-      if (cancelled) return;
-      if (error || !data) {
-        setError("We couldn't find this order.");
-        return;
+      try {
+        const { data, error } = await insforge.database
+          .from("orders")
+          .select("id, total, payment_status")
+          .eq("id", orderId)
+          .maybeSingle();
+        if (cancelled) return;
+        if (!error && data) {
+          setOrder(data as OrderRow);
+          return;
+        }
+      } catch {
+        // Fallback
       }
-      setOrder(data as OrderRow);
+
+      // Check localStorage
+      try {
+        const stored = JSON.parse(localStorage.getItem("aurelia-orders") || "[]");
+        const found = stored.find((o: OrderRow) => o.id === orderId);
+        if (found) {
+          setOrder(found);
+          return;
+        }
+      } catch {
+        // Ignore
+      }
+
+      if (!cancelled) setError("We couldn't find this order.");
     })();
     return () => {
       cancelled = true;
@@ -83,11 +100,16 @@ export default function PaymentPage({
                 <p>
                   Order total: <strong>{money(total ?? 0)}</strong>
                 </p>
-                <p>
-                  Pay {money(total ?? 0)} with PayPal (
-                  {PAYPAL_ME_URL?.replace(/^https?:\/\//, "")}) to confirm your
-                  order.
-                </p>
+                {PAYPAL_ME_URL ? (
+                  <p>
+                    Pay <strong>{money(total ?? 0)}</strong> via PayPal (
+                    {PAYPAL_ME_URL.replace(/^https?:\/\//, "")}) to complete your purchase.
+                  </p>
+                ) : (
+                  <p style={{ maxWidth: 460, margin: "0 auto", color: "var(--muted, #8a8178)" }}>
+                    <strong>Demo Simulation Mode:</strong> No live PayPal handle is set in <code>.env.local</code>. Click below to simulate an approved payment and generate an order confirmation.
+                  </p>
+                )}
                 <div className="order-number">{order.id}</div>
                 <div
                   style={{
@@ -98,9 +120,25 @@ export default function PaymentPage({
                     marginTop: 30,
                   }}
                 >
-                  <Link href={returnHref} className="btn btn-dark">
-                    Pay with PayPal
-                  </Link>
+                  {PAYPAL_ME_URL ? (
+                    <>
+                      <a
+                        href={`${PAYPAL_ME_URL.replace(/\/+$/, "")}/${total?.toFixed(2)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-dark"
+                      >
+                        Open PayPal.Me ({money(total ?? 0)}) ↗
+                      </a>
+                      <Link href={returnHref} className="btn">
+                        I&apos;ve paid — confirm order
+                      </Link>
+                    </>
+                  ) : (
+                    <Link href={returnHref} className="btn btn-dark">
+                      Simulate PayPal Payment &amp; Confirm
+                    </Link>
+                  )}
                 </div>
               </>
             )}

@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <p className="footer-logo">VELOUR</p>
+          <p className="footer-logo">AURELIA</p>
           <p className="footer-blurb">
             Quietly luxurious essentials for men and women — considered fabrics,
             honest construction, timeless silhouettes.
@@ -30,13 +30,14 @@ export default function Footer() {
           <Link href="/contact">Contact</Link>
         </div>
         <div className="footer-col">
-          <p className="footer-heading">Support &amp; Legal</p>
+          <p className="footer-heading">Support &amp; System</p>
           <Link href="/privacy">Privacy</Link>
           <Link href="/contact">Contact</Link>
+          <Link href="/admin">Backend &amp; DB</Link>
         </div>
       </div>
       <div className="footer-bottom">
-        <p>© {year} VELOUR. All rights reserved.</p>
+        <p>© {year} AURELIA. All rights reserved.</p>
       </div>
     </footer>
   );

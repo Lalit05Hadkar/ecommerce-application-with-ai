@@ -17,7 +17,7 @@ export default function Hero() {
         playsInline
         preload="metadata"
         poster="/images/hero-poster.jpg"
-        aria-label="VELOUR seasonal editorial"
+        aria-label="AURELIA seasonal editorial"
       >
         <source src="/videos/hero.mp4" type="video/mp4" />
       </video>

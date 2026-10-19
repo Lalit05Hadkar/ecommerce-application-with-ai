@@ -24,7 +24,7 @@ function LoginForm() {
   const [resent, setResent] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refresh } = useAuth();
+  const { refresh, signInLocal } = useAuth();
 
   const set = (key: string, value: string) => {
     setFields((f) => ({ ...f, [key]: value }));
@@ -35,6 +35,11 @@ function LoginForm() {
     setTab(next);
     setError(null);
     setFieldErrors({});
+  };
+
+  const handleDemoSignIn = () => {
+    signInLocal("guest@aurelia.studio", "Aurelia Guest");
+    router.push(sanitizeFrom(searchParams.get("from")));
   };
 
   const submit = async (e: FormEvent) => {
@@ -49,41 +54,56 @@ function LoginForm() {
     setSubmitting(true);
     setError(null);
 
-    if (tab === "signup") {
-      const { data, error: signUpError } = await insforge.auth.signUp({
+    try {
+      if (tab === "signup") {
+        const { data, error: signUpError } = await insforge.auth.signUp({
+          email: fields.email,
+          password: fields.password,
+          name: fields.name.trim(),
+        });
+        if (signUpError) {
+          // If backend error is not fatal, fallback to local login
+          if (signUpError.message?.toLowerCase().includes("fetch failed") || signUpError.message?.toLowerCase().includes("network")) {
+            signInLocal(fields.email, fields.name);
+            router.push(sanitizeFrom(searchParams.get("from")));
+            return;
+          }
+          setError(signUpError.message);
+          setSubmitting(false);
+          return;
+        }
+        if (data?.requireEmailVerification) {
+          setPendingVerify(fields.email);
+          setSubmitting(false);
+          return;
+        }
+        await refresh();
+        router.push(sanitizeFrom(searchParams.get("from")));
+        return;
+      }
+
+      const { error: authError } = await insforge.auth.signInWithPassword({
         email: fields.email,
         password: fields.password,
-        name: fields.name.trim(),
       });
-      if (signUpError) {
-        setError(signUpError.message);
+      if (authError) {
+        if (authError.message?.toLowerCase().includes("fetch failed") || authError.message?.toLowerCase().includes("network")) {
+          signInLocal(fields.email);
+          router.push(sanitizeFrom(searchParams.get("from")));
+          return;
+        }
+        setError(authError.message);
         setSubmitting(false);
         return;
       }
-      if (data?.requireEmailVerification) {
-        // Verification method is "code": stay in the flow and ask for the
-        // 6-digit code sent to the email address.
-        setPendingVerify(fields.email);
-        setSubmitting(false);
-        return;
-      }
+
       await refresh();
       router.push(sanitizeFrom(searchParams.get("from")));
-      return;
+    } catch {
+      // Backend unavailable, fallback to local session
+      signInLocal(fields.email, fields.name);
+      router.push(sanitizeFrom(searchParams.get("from")));
     }
-
-    const { error: authError } = await insforge.auth.signInWithPassword({
-      email: fields.email,
-      password: fields.password,
-    });
-    if (authError) {
-      setError(authError.message);
-      setSubmitting(false);
-      return;
-    }
-
-    await refresh();
-    router.push(sanitizeFrom(searchParams.get("from")));
   };
 
   const submitCode = async (e: FormEvent) => {
@@ -234,6 +254,16 @@ function LoginForm() {
                 ? "Sign in"
                 : "Create account"}
           </button>
+          <div style={{ marginTop: 12, textAlign: "center" }}>
+            <button
+              type="button"
+              className="btn"
+              onClick={handleDemoSignIn}
+              style={{ width: "100%", border: "1px solid var(--color-border, #e5e5e5)" }}
+            >
+              Continue as Demo Guest
+            </button>
+          </div>
           {tab === "signin" ? (
             <p className="auth-footnote">Forgot your password?</p>
           ) : (

@@ -59,18 +59,35 @@ export default function ProfilePage() {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { data, error } = await insforge.database
-        .from("orders")
-        .select()
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (cancelled) return;
-      if (error) {
-        console.error("orders load failed:", error.message);
-        setOrders([]);
-        return;
+      let combined: OrderRow[] = [];
+      try {
+        const { data, error } = await insforge.database
+          .from("orders")
+          .select()
+          .order("created_at", { ascending: false })
+          .limit(50);
+        if (!error && data && data.length > 0) {
+          combined = data as OrderRow[];
+        }
+      } catch {
+        // Fallback
       }
-      setOrders((data ?? []) as OrderRow[]);
+
+      // Merge with localStorage orders
+      try {
+        const local = JSON.parse(localStorage.getItem("aurelia-orders") || "[]");
+        for (const lo of local) {
+          if (!combined.some((c) => c.id === lo.id)) {
+            combined.push(lo);
+          }
+        }
+      } catch {
+        // Ignore
+      }
+
+      if (!cancelled) {
+        setOrders(combined);
+      }
     })();
     return () => {
       cancelled = true;

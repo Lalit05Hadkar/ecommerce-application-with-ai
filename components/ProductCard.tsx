@@ -1,9 +1,24 @@
+"use client";
+
 import Link from "next/link";
 import { money } from "@/lib/format";
 import type { Product } from "@/lib/types";
+import { useCart } from "@/lib/store";
+import { useToast } from "./Toast";
 import Img from "./Img";
 
 export default function ProductCard({ product }: { product: Product }) {
+  const { add } = useCart();
+  const toast = useToast();
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const defaultSize = product.sizes[0] || "M";
+    add(product, defaultSize, 1);
+    toast(`Added ${product.name} (${defaultSize}) to cart`);
+  };
+
   return (
     <Link href={`/product/${product.id}`} className="product-card">
       <div className="product-card-media">
@@ -22,7 +37,14 @@ export default function ProductCard({ product }: { product: Product }) {
           className="product-img product-img-hover"
         />
         {product.isNew && <span className="badge-new">New</span>}
-        <span className="quick-add">Quick add</span>
+        <button
+          type="button"
+          className="quick-add"
+          onClick={handleQuickAdd}
+          aria-label={`Quick add ${product.name} to cart`}
+        >
+          Quick add
+        </button>
       </div>
       <div className="product-card-info">
         <p className="product-name">{product.name}</p>

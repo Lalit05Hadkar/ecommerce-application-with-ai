@@ -159,7 +159,7 @@ export default async function Home() {
       {/* Newsletter */}
       <section className="newsletter">
         <Reveal>
-          <p className="micro-label">The VELOUR List</p>
+          <p className="micro-label">The AURELIA Journal</p>
           <h2>First to know</h2>
           <p>
             New collections, private sales, and stories from the atelier —

@@ -25,7 +25,7 @@ export default async function SearchPage({
               Results for &ldquo;{query}&rdquo;
             </>
           ) : (
-            "Search VELOUR"
+            "Search AURELIA"
           )}
         </h1>
         {query && (

@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { insforge } from "./insforge";
+import { insforge, isInsForgeAvailable } from "./insforge";
 import { useAuth } from "./auth";
 import type { Product } from "./types";
 
@@ -33,7 +33,8 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-const STORAGE_KEY = "velour-cart";
+const STORAGE_KEY = "aurelia-cart";
+const LEGACY_STORAGE_KEY = "velour-cart";
 
 interface CartRow {
   product_id: string;
@@ -77,7 +78,7 @@ function mapProduct(row: ProductRow): Product {
 
 function readStored(): CartLine[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
@@ -118,7 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const upsertRemote = useCallback(
     async (productId: string, size: string, quantity: number) => {
-      if (!userRef.current) return;
+      if (!isInsForgeAvailable || !userRef.current) return;
       try {
         const { data, error } = await insforge.database
           .from("carts")
@@ -146,7 +147,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const deleteRemote = useCallback(
     async (productId: string, size: string) => {
-      if (!userRef.current) return;
+      if (!isInsForgeAvailable || !userRef.current) return;
       try {
         const { error } = await insforge.database
           .from("carts")
@@ -162,7 +163,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const clearRemote = useCallback(async () => {
-    if (!userRef.current) return;
+    if (!isInsForgeAvailable || !userRef.current) return;
     try {
       // RLS scopes the delete to the caller's own rows.
       const { error } = await insforge.database.from("carts").delete();
@@ -172,10 +173,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // On login: load cart lines from the carts table. On logout: keep the
-  // local cart as-is (guest mode).
+  // On login: load cart lines from the carts table if live backend configured.
   useEffect(() => {
-    if (!user) return;
+    if (!isInsForgeAvailable || !user) return;
     if (syncedForRef.current === user.id) return;
     syncedForRef.current = user.id;
 

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   VELOUR — design system
+   AURELIA — design system
    Palette: warm off-white #faf8f5, near-black #16130f, taupe/stone accents,
    hairline borders #e5e0da. Fonts: Cormorant Garamond (display) + Inter (body).
    ========================================================================== */
@@ -852,6 +852,17 @@ h3,
 .product-card:hover .quick-add {
   opacity: 1;
   transform: translateY(0);
+}
+
+button.quick-add {
+  cursor: pointer;
+  border: none;
+  color: var(--ink);
+}
+
+button.quick-add:hover {
+  background: #16130f;
+  color: #faf8f5;
 }
 
 .product-card-info {

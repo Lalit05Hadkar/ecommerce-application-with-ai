@@ -32,7 +32,7 @@ export default function HeroSlideshow() {
         <div key={src} className={`hero-slide${i === active ? " active" : ""}`}>
           <Img
             src={src}
-            alt={i === 0 ? "VELOUR seasonal editorial" : ""}
+            alt={i === 0 ? "AURELIA seasonal editorial" : ""}
             fill
             priority={i === 0}
             sizes="100vw"

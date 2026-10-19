@@ -327,9 +327,13 @@ export const CATEGORIES: Record<Product["category"], string[]> = {
   men: ["Outerwear", "Knitwear", "Shirts", "Trousers", "T-Shirts", "Denim"],
 };
 
-// Active catalogue. To include the demo products alongside generated ones, use:
-// export const PRODUCTS: Product[] = [...BASE_PRODUCTS, ...GENERATED_PRODUCTS];
-export const PRODUCTS: Product[] = GENERATED_PRODUCTS;
+// Active catalogue combining high-res editorial pieces and full base catalogue
+export const PRODUCTS: Product[] = [
+  ...GENERATED_PRODUCTS,
+  ...BASE_PRODUCTS.filter(
+    (bp) => !GENERATED_PRODUCTS.some((gp) => gp.id === bp.id)
+  ),
+];
 
 /**
  * Subcategories that actually have products in the active catalogue for the

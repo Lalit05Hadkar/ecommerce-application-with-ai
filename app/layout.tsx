@@ -8,16 +8,16 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "VELOUR — Premium Fashion for Women & Men",
-    template: "%s | VELOUR",
+    default: "AURELIA — Contemporary Luxury for Women & Men",
+    template: "%s | AURELIA",
   },
   description:
-    "Quietly luxurious essentials for men and women — considered fabrics, honest construction, timeless silhouettes.",
+    "Quietly luxurious essentials for women and men — considered fabrics, honest construction, timeless silhouettes.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
